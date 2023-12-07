@@ -7,6 +7,7 @@ import xgboost as xgb
 from flask import Flask, request, jsonify, render_template
 import io
 import boto3
+from sklearn.metrics import roc_curve
 #define a flask app
 app = flask.Flask(__name__)
 
@@ -194,6 +195,86 @@ def predict_route():
         return flask.jsonify({'message': 'Successfully uploaded predictions to S3', 'file_url': file_url})
     except Exception as e:
         return flask.jsonify({'error': str(e)})
+
+
+def calculate_cost(default_rate, non_default_rate,fpr,tpr, cost_benefit_matrix):
+    fp=fpr
+    tn=1-fpr
+    fn=1-tpr
+    tp=tpr
+
+    # Calculate the total cost using the cost-benefit matrix
+
+    # here we assume that avg transction amount is $1 
+    total_cost = (non_default_rate*fp * cost_benefit_matrix[0, 1] +
+                  default_rate*fn* cost_benefit_matrix[1, 0] +
+                  default_rate* tp * cost_benefit_matrix[0, 0] +
+                  non_default_rate* tn * cost_benefit_matrix[1, 1])
+    return total_cost 
+
+def find_fixed_cutoff(y_true, y_pred_prob, cost_benefit_matrix,default_rate,non_default_rate,target_cost=0):
+    # Initialize lists to store the costs and cutoffs
+    costs = []
+    fpr, tpr, thresholds = roc_curve(y_true, y_pred_prob)
+    cut_offs = []
+    # Calculate the cost for each threshold
+    
+    for i in range(0, len(thresholds)):
+        costs.append(calculate_cost(default_rate, non_default_rate,fpr[i],tpr[i], cost_benefit_matrix))
+        cut_offs.append(fpr[i])
+
+    # Find the cutoff where the cost is closest to the target cost
+    optimal_idx = np.argmin(np.abs(np.array(costs) - target_cost))
+    return fpr[optimal_idx],tpr[optimal_idx],thresholds[optimal_idx]
+
+
+    
+
+@app.route('/cut_off', methods=['POST'])
+def cut_off():
+    """
+    This function returns the cut-off point for the model
+    """
+    #get the cost of false positive from the request
+    cost_fp = flask.request.form['cost_fp']
+    #get the cost of false negative from the request
+    cost_fn = flask.request.form['cost_fn']
+    #get the cost of true positive from the request
+    cost_tp = flask.request.form['cost_tp']
+    #get the cost of true negative from the request
+    cost_tn = flask.request.form['cost_tn']
+
+    #create the cost benefit matrix
+    cost_benefit_matrix = np.array([
+                                    [-float(cost_tp),float(cost_fp)],  # TP, FP
+                                    [float(cost_fn), -float(cost_tn)]    # FN, TN
+                                ])
+
+
+    #get the cost from the request
+    cost = flask.request.form['cost']
+    #calculate the cut-off point
+    fpr,tpr,cut_off=cut_off_analysis(cost_benefit_matrix,float(cost))
+    return flask.jsonify({'fpr': fpr, 'tpr': tpr,'cut_off':cut_off})
+
+
+
+def cut_off_analysis(cost_benefit_matrix,target_cost):
+    """
+    This function calculates the cut-off point for the model
+    """
+    df=pd.read_csv("test.csv",index_col=0)
+    default_rate = df['target'].mean()
+    non_default_rate = 1 - default_rate
+    y_true=df['target']
+    y_pred_prob=model.predict_proba(df.drop('target',axis=1))[:,-1]
+    cut_off_fpr,cut_off_tpr,cut_off=find_fixed_cutoff(y_true, y_pred_prob, cost_benefit_matrix,default_rate,non_default_rate,target_cost=target_cost)
+
+
+
+
+
+
 
         
     
