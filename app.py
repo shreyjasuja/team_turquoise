@@ -16,7 +16,7 @@ load_dotenv()  # This loads the variables from .env
 import os
 aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
 aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-aws_region = os.environ.get("AWS_REGION")
+
 
 
 def calculate_fin_ratios(df):
@@ -182,7 +182,7 @@ def predict_route():
     # Create an S3 client
     # Upload to S3
     # s3_client = boto3.client('s3')
-    bucket_name = 'turquoise-ai'
+    bucket_name = 'finance3'
     #change the object name based on current date and time
     object_name = f'predictions_{datetime.now().strftime("%Y-%m-%d_%H:%M:%S")}.csv'
     region_name = 'us-east-1'
