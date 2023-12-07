@@ -189,7 +189,7 @@ def predict_route():
     s3 = boto3.client('s3')
     # Write the buffer to an S3 object
     try:
-        s3.put_object(Body=buffer.getvalue(), Bucket=bucket_name, Key=object_name,Body=buffer.getvalue())
+        s3.put_object(Body=buffer.getvalue(), Bucket=bucket_name, Key=object_name)
         file_url = f'https://{bucket_name}.s3.{region_name}.amazonaws.com/{object_name}'
         return flask.jsonify({'message': 'Successfully uploaded predictions to S3', 'file_url': file_url})
     except Exception as e:
