@@ -155,9 +155,9 @@ def predict(df):
     predictions=predictions.apply(lambda x: x if 0<=x<=1 else 0)
 
     calibrated_scores = apply_calibration_bins(predictions)
-    calibrated_scores = pd.Series(calibrated_scores)
+    X["scores"]=calibrated_scores
 
-    return calibrated_scores
+    return X
 
 @app.route('/')
 def index():
@@ -269,6 +269,7 @@ def cut_off_analysis(cost_benefit_matrix,target_cost):
     y_true=df['target']
     y_pred_prob=model.predict_proba(df.drop('target',axis=1))[:,-1]
     cut_off_fpr,cut_off_tpr,cut_off=find_fixed_cutoff(y_true, y_pred_prob, cost_benefit_matrix,default_rate,non_default_rate,target_cost=target_cost)
+    return cut_off_fpr,cut_off_tpr,cut_off
 
 
 
