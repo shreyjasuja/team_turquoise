@@ -290,7 +290,7 @@ def cut_off_analysis(cost_benefit_matrix,target_cost):
 if __name__ == '__main__':
     model=xgb.XGBClassifier()
     model.load_model("turquoise_model.bin")
-    app.run(port = 5000, debug=True)
+    app.run(port = 8000, debug=True)
 
 
     
