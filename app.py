@@ -228,7 +228,7 @@ def find_fixed_cutoff(y_true, y_pred_prob, cost_benefit_matrix,default_rate,non_
     return fpr[optimal_idx],tpr[optimal_idx],thresholds[optimal_idx]
 
 
-    
+import json
 
 @app.route('/cut_off', methods=['POST'])
 def cut_off():
@@ -255,7 +255,8 @@ def cut_off():
     cost = flask.request.form['cost']
     #calculate the cut-off point
     fpr,tpr,cut_off=cut_off_analysis(cost_benefit_matrix,float(cost))
-    return flask.jsonify({'fpr': fpr, 'tpr': tpr,'cut_off':cut_off})
+    #send float values to json
+    return json.dumps({'fpr': float(fpr),'tpr':float(tpr),'cut_off':float(cut_off)})
 
 
 
@@ -267,7 +268,12 @@ def cut_off_analysis(cost_benefit_matrix,target_cost):
     default_rate = df['target'].mean()
     non_default_rate = 1 - default_rate
     y_true=df['target']
-    y_pred_prob=model.predict_proba(df.drop('target',axis=1))[:,-1]
+    features=['legal_struct', 'CFO_ratio', 'current_ratio','roa', 'leverage', 'fixed_assets']
+
+    processed_data = preprocessor(df, new = False)
+    X=processed_data[features]
+
+    y_pred_prob=model.predict_proba(X)[:,-1]
     cut_off_fpr,cut_off_tpr,cut_off=find_fixed_cutoff(y_true, y_pred_prob, cost_benefit_matrix,default_rate,non_default_rate,target_cost=target_cost)
     return cut_off_fpr,cut_off_tpr,cut_off
 
