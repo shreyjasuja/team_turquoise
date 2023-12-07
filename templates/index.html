@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV File Upload</title>
+</head>
+<body>
+
+<h2>Upload CSV File</h2>
+
+<!-- File Upload Form -->
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required>
+    <input type="submit" value="Upload">
+</form>
+
+<!-- Div to display the response -->
+<div id="response"></div>
+
+<script>
+    document.getElementById('uploadForm').onsubmit = function(event) {
+        event.preventDefault();
+
+        // Form Data
+        var formData = new FormData(this);
+
+        // AJAX Request
+        fetch('/predict', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+        })
+        .catch(error => {
+            document.getElementById('response').innerHTML = 'Error: ' + error;
+        });
+    };
+</script>
+
+</body>
+</html>
