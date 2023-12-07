@@ -1,15 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CSV File Upload</title>
+    <title>Team Turquoise - Predicting Optimal Cutoffs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #666;
+        }
+
+        input[type="number"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #4cae4c;
+        }
+
+        #response {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #eee;
+            border: 1px dashed #bbb;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
+<img src="https://miro.medium.com/v2/resize:fit:640/format:webp/1*UC0sy0bENl-DLPy3jmXNag.jpeg" alt="Team Turquoise Logo" style="display: block; margin: 0 auto;">
 
 <h2>Upload CSV File</h2>
 
 <!-- File Upload Form -->
 <form id="uploadForm" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".csv" required>
+    <input type="file" name="file" accept=".csv" required><br>
+
+    <label for="costFP">Cost of False Positives:</label>
+    <input type="number" id="costFP" name="costFP" step="any" required><br>
+
+    <label for="costFN">Cost of False Negatives:</label>
+    <input type="number" id="costFN" name="costFN" step="any" required><br>
+
+    <label for="benefitTP">Benefit of True Positives:</label>
+    <input type="number" id="benefitTP" name="benefitTP" step="any" required><br>
+
+    <label for="benefitTN">Benefit of True Negatives:</label>
+    <input type="number" id="benefitTN" name="benefitTN" step="any" required><br>
+
     <input type="submit" value="Upload">
 </form>
 
