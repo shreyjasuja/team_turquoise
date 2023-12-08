@@ -256,7 +256,7 @@ def cut_off():
     #calculate the cut-off point
     fpr,tpr,cut_off=cut_off_analysis(cost_benefit_matrix,float(cost))
     #send float values to json
-    return json.dumps({'fpr': float(fpr),'tpr':float(tpr),'cut_off':float(cut_off)})
+    return json.dumps({'fpr': float(fpr),'tpr':float(tpr)})
 
 
 

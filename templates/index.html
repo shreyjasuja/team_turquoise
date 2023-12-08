@@ -87,10 +87,14 @@
 
 <!-- Div to display the response -->
 <div id="response"></div>
-
 <script>
     document.getElementById('uploadForm').onsubmit = function(event) {
         event.preventDefault();
+
+        // Function to format values as percentages
+        function formatPercentage(value) {
+            return (value * 100).toFixed(2) + '%';
+        }
 
         // Form Data
         var formData = new FormData(this);
@@ -102,7 +106,13 @@
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+            // Check if the response contains a file URL
+            if (data.file_url) {
+                // Add a button to the response div that links to the file URL
+                document.getElementById('response').innerHTML = `<p>${JSON.stringify(data, null, 2)}</p><a href="${data.file_url}" target="_blank"><button>Download Predictions</button></a>`;
+            } else {
+                document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
+            }
             // After receiving a response from '/predict', make a second request to '/cut_off'
             return fetch('/cut_off', {
                 method: 'POST',
@@ -111,7 +121,8 @@
         })
         .then(response => response.json())
         .then(data => {
-            document.getElementById('response').innerHTML += '<br>Cutoff Calculations: ' + JSON.stringify(data);
+            // Display FPR and TPR in a readable format
+            document.getElementById('response').innerHTML += `<br><h3>Cutoff Calculations:</h3><p>False Positive Rate (FPR): ${formatPercentage(data.fpr)}</p><p>True Positive Rate (TPR): ${formatPercentage(data.tpr)}</p>`;
         })
         .catch(error => {
             document.getElementById('response').innerHTML += '<br>Error: ' + error;
@@ -120,39 +131,6 @@
 </script>
 
 
-
-<div id="response"></div>
-
-<script>
-    document.getElementById('uploadForm').onsubmit = function(event) {
-        event.preventDefault();
-
-        // Form Data
-        var formData = new FormData(this);
-
-        // First AJAX Request to '/predict'
-        fetch('/predict', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('response').innerHTML = JSON.stringify(data, null, 2);
-            // After receiving a response from '/predict', make a second request to '/cut_off'
-            return fetch('/cut_off', {
-                method: 'POST',
-                body: formData
-            });
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('response').innerHTML += '<br>Cutoff Calculations: ' + JSON.stringify(data);
-        })
-        .catch(error => {
-            document.getElementById('response').innerHTML += '<br>Error: ' + error;
-        });
-    };
-</script>
 
 </body>
 </html>
